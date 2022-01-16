@@ -18,8 +18,6 @@ type AesoApiService struct {
 	apiKey string
 }
 
-var service *AesoApiService
-
 func (a *AesoApiService) execute(url string) []byte {
 	client := &http.Client{}
 	log.Printf("Getting: %s\n" , url)
@@ -43,9 +41,8 @@ func (a *AesoApiService) execute(url string) []byte {
 	return buffer
 }
 
-func Init(key string) *AesoApiService {
-	service = &AesoApiService{
+func NewAesoApiService(key string) AesoApiService {
+	return AesoApiService{
 		apiKey: key,
 	}
-	return service
 }
