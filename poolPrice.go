@@ -40,8 +40,11 @@ func (a *AesoApiService) GetPoolPrice(start, end time.Time) ([]MappedPoolPrice, 
 	var aesoRes AesoPoolResponse
 	sDateString := start.Format("2006-01-02")
 	eDateString := end.Format("2006-01-02")
-	bytes := a.execute(fmt.Sprintf(AESO_API_URL_POOLPRICE, sDateString, eDateString))
-	err := json.Unmarshal(bytes, &aesoRes)
+	bytes, err := a.execute(fmt.Sprintf(AESO_API_URL_POOLPRICE, sDateString, eDateString))
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(bytes, &aesoRes)
 	if err != nil {
 		log.Println(err)
 		return []MappedPoolPrice{}, err

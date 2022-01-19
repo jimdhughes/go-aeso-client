@@ -9,30 +9,30 @@ import (
 	"time"
 )
 
-const AESO_API_URL_SYSTEMMARGINALPRICE="https://api.aeso.ca/report/v1/systemMarginalPrice?startDate=%s&endDate=%s"
+const AESO_API_URL_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1/systemMarginalPrice?startDate=%s&endDate=%s"
 
 type MappedSystemMarginalPrice struct {
-	Date time.Time `json:"date"`
-	HourEnding int64 `json:"hourEnding"`
-	Price float64 `json:"price"`
-	VolumeInMW float64 `json:"volumeInMW"`
+	Date       time.Time `json:"date"`
+	HourEnding int64     `json:"hourEnding"`
+	Price      float64   `json:"price"`
+	VolumeInMW float64   `json:"volumeInMW"`
 }
 
 type AesoSystemMarginalPriceReport struct {
 	DateHourEnding string `json:"dateHourEnding"`
-	Time string `json:"time"`
-	PriceInDollar string `json:"priceInDollar"`
-	VolumeInMW string `json:"volumeInMW"`
+	Time           string `json:"time"`
+	PriceInDollar  string `json:"priceInDollar"`
+	VolumeInMW     string `json:"volumeInMW"`
 }
 
 type AesoSystemMarginalPriceResponseReportPart struct {
-			Report []AesoSystemMarginalPriceReport `json:"System Marginal Price Report"`
+	Report []AesoSystemMarginalPriceReport `json:"System Marginal Price Report"`
 }
 
 type AesoSystemMarginalPriceResponse struct {
-	Timestamp string `json:"timestamp"`
-	ResponseCode string `json:"responseCode"`
-	Return AesoSystemMarginalPriceResponseReportPart `json:"return"`
+	Timestamp    string                                    `json:"timestamp"`
+	ResponseCode string                                    `json:"responseCode"`
+	Return       AesoSystemMarginalPriceResponseReportPart `json:"return"`
 }
 
 func (a *AesoApiService) GetSystemMarginalPrice(start, end time.Time, offset int64) []MappedSystemMarginalPrice {
@@ -40,12 +40,16 @@ func (a *AesoApiService) GetSystemMarginalPrice(start, end time.Time, offset int
 	var res []MappedSystemMarginalPrice
 	sDateString := start.Format("2006-01-02")
 	eDateString := end.Format("2006-01-02")
-	bytes := a.execute(fmt.Sprintf(AESO_API_URL_POOLPRICE, sDateString, eDateString))
-	err := json.Unmarshal(bytes, &response)
+	bytes, err := a.execute(fmt.Sprintf(AESO_API_URL_POOLPRICE, sDateString, eDateString))
+	if err != nil {
+		log.Println(err)
+		return []MappedSystemMarginalPrice{}
+	}
+	err = json.Unmarshal(bytes, &response)
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, entry := range(response.Return.Report) {
+	for _, entry := range response.Return.Report {
 		// Date comes back as yyyy-mm-dd HH
 		parts := strings.Split(entry.DateHourEnding, " ")
 		date, err := time.Parse("01/02/2006", parts[0])
@@ -80,9 +84,9 @@ func (a *AesoApiService) GetSystemMarginalPrice(start, end time.Time, offset int
 			log.Fatal(err)
 		}
 		res = append(res, MappedSystemMarginalPrice{
-			Date: date,
+			Date:       date,
 			HourEnding: h,
-			Price: price,
+			Price:      price,
 			VolumeInMW: volume,
 		})
 	}
