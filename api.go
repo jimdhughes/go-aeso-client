@@ -1,17 +1,18 @@
 package aeso
 
 import (
+	"errors"
 	"io"
 	"log"
 	"net/http"
 )
 
-const AESO_AUTH_HEADER="X-API-Key"
+const AESO_AUTH_HEADER = "X-API-Key"
 
 type AesoError struct {
 	Timestamp string `json:"timestamp"`
-	Message string `json:"message"`
-	Details string `json:"details"`
+	Message   string `json:"message"`
+	Details   string `json:"details"`
 }
 
 type AesoApiService struct {
@@ -20,7 +21,7 @@ type AesoApiService struct {
 
 func (a *AesoApiService) execute(url string) []byte {
 	client := &http.Client{}
-	log.Printf("Getting: %s\n" , url)
+	log.Printf("Getting: %s\n", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -41,8 +42,11 @@ func (a *AesoApiService) execute(url string) []byte {
 	return buffer
 }
 
-func NewAesoApiService(key string) AesoApiService {
+func NewAesoApiService(key string) (AesoApiService, error) {
+	if key == "" {
+		return AesoApiService{}, errors.New("AESO API key is required")
+	}
 	return AesoApiService{
 		apiKey: key,
-	}
+	}, nil
 }

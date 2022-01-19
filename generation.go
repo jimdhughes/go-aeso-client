@@ -7,55 +7,54 @@ import (
 	"time"
 )
 
-const AESO_API_URL_GENERATION="https://www.aeso.ca/ets/ets-generation.json"
+const AESO_API_URL_GENERATION = "https://www.aeso.ca/ets/ets-generation.json"
 
 type TimeSeriesMeasurement struct {
 	Measurement string
-	Source string
-	Value int
-	Timestamp int
+	Source      string
+	Value       int
+	Timestamp   int
 }
 
 type Measurement struct {
-	Date time.Time `json:"date"`
-	Measure int `json:"measure"`
+	Date    time.Time `json:"date"`
+	Measure int       `json:"measure"`
 }
 
 type Source struct {
-	Coal []Measurement `json:"coal"`
-	Gas []Measurement `json:"gas"`
+	Coal  []Measurement `json:"coal"`
+	Gas   []Measurement `json:"gas"`
 	Hydro []Measurement `json:"hydro"`
-	Wind []Measurement `json:"wind"`
+	Wind  []Measurement `json:"wind"`
 	Other []Measurement `json:"other"`
 }
 
 type GenerationInfo struct {
-	Updated string `json:"updated"`
-	MaxCapacity Source `json:"maxCapacity"`
+	Updated                      string `json:"updated"`
+	MaxCapacity                  Source `json:"maxCapacity"`
 	DispatchedContingencyReserve Source `json:"dispatchedContingencyReserve"`
-	TotalNetGeneration Source `json:"totalNetGeneration"`
+	TotalNetGeneration           Source `json:"totalNetGeneration"`
 }
 
 type AesoSource struct {
-	Coal [][]int `json:"COAL"`
-	Gas [][]int `json:"GAS"`
+	Coal  [][]int `json:"COAL"`
+	Gas   [][]int `json:"GAS"`
 	Hydro [][]int `json:"HYDRO"`
-	Wind [][]int `json:"WIND"`
+	Wind  [][]int `json:"WIND"`
 	Other [][]int `json:"OTHER"`
 }
 
 type AesoResponse struct {
-	Updated	string `json:"update"`
-	MaxCapacity AesoSource `json:"mc"`
+	Updated                      string     `json:"update"`
+	MaxCapacity                  AesoSource `json:"mc"`
 	DispatchedContingencyReserve AesoSource `json:"dcr"`
-	TotalNetGeneration AesoSource `json:"tng"`
+	TotalNetGeneration           AesoSource `json:"tng"`
 }
 
 func (a *AesoApiService) GetGenerationData() GenerationInfo {
 	aesoRes := getData()
 	return mapAesoData(aesoRes)
 }
-
 
 func getData() AesoResponse {
 	client := http.Client{}
@@ -73,14 +72,15 @@ func getData() AesoResponse {
 	return data
 }
 
+// mapAesoData takes the AesoResponse from the API and maps it to a GenerationInfo struct
 func mapAesoData(data AesoResponse) GenerationInfo {
 	g := GenerationInfo{
-		Updated: data.Updated,
-		MaxCapacity: Source{},
+		Updated:                      data.Updated,
+		MaxCapacity:                  Source{},
 		DispatchedContingencyReserve: Source{},
-		TotalNetGeneration: Source{},
+		TotalNetGeneration:           Source{},
 	}
-	
+
 	// MC
 	g.MaxCapacity.Coal = extractAESOMeasurements(data.MaxCapacity.Coal)
 	g.MaxCapacity.Gas = extractAESOMeasurements(data.MaxCapacity.Gas)
@@ -102,6 +102,7 @@ func mapAesoData(data AesoResponse) GenerationInfo {
 	return g
 }
 
+// Probably not needed in the library. I used this for my other app
 func (g *GenerationInfo) ToTimeSeries() []TimeSeriesMeasurement {
 	var timeSeries []TimeSeriesMeasurement
 	// MC
@@ -126,27 +127,28 @@ func (g *GenerationInfo) ToTimeSeries() []TimeSeriesMeasurement {
 	return timeSeries
 }
 
+// extractAESOMeasurements takes the expected array of [][]int and returns an array of Measurements for easier debugging
+// Integer array has the structure [[unixTimestamp, value]] where unixTimestamp is the date/time and measurement is MWH produced
 func extractAESOMeasurements(input [][]int) []Measurement {
 	var measurements []Measurement
-	for _, entry := range(input) {
-		measurement := Measurement {
-			Date: time.Unix(int64(entry[0]/1000), 0),
+	for _, entry := range input {
+		measurement := Measurement{
+			Date:    time.Unix(int64(entry[0]/1000), 0),
 			Measure: entry[1],
 		}
 		measurements = append(measurements, measurement)
 	}
-
 	return measurements
 }
 
 func convertMeasurementToTimeseriesMeasurement(measurement, source string, measurements []Measurement) []TimeSeriesMeasurement {
 	var ts []TimeSeriesMeasurement
-	for _, entry := range(measurements) {
+	for _, entry := range measurements {
 		t := TimeSeriesMeasurement{
 			Measurement: measurement,
-			Source: source,
-			Value: entry.Measure,
-			Timestamp: int(entry.Date.Unix()),
+			Source:      source,
+			Value:       entry.Measure,
+			Timestamp:   int(entry.Date.Unix()),
 		}
 		ts = append(ts, t)
 	}
