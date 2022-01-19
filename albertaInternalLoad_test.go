@@ -1,7 +1,9 @@
 package aeso
 
 import (
+	"bytes"
 	"errors"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"testing"
@@ -86,6 +88,27 @@ func TestHandleAesoResponseExpect400ResponseAndErr(t *testing.T) {
 	_, err := aesoClient.GetAlbertaInternalLoad(sDate, eDate)
 	if err == nil && err.Error() != ERR_INVALID_RESPONSE_CODE {
 		t.Errorf("Expected Error: %s. Expected Error: %v", ERR_INVALID_RESPONSE_CODE, err)
+	}
+}
+
+func TestHandleAesoResponseExpectValidResponse(t *testing.T) {
+	json := `{"timestamp":"2022-01-19 07:00","responseCode":"200","return":{"Actual Forecast Report":[{"begin_date_time_utc":"2022-01-19 07:00","begin_date_time_mpt":"2022-01-19 00:00","alberta_internal_load":"0.0","forecast_alberta_internal_load":"0.0"}]}}`
+	r := ioutil.NopCloser(bytes.NewReader([]byte(json)))
+	mocks.GetDoFunc = func(*http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       r,
+		}, nil
+	}
+	sDate := time.Now()
+	eDate := time.Now()
+	sDate.Add(-1 * 24 * time.Hour)
+	response, err := aesoClient.GetAlbertaInternalLoad(sDate, eDate)
+	if err != nil {
+		t.Errorf("Error: %v", err)
+	}
+	if len(response) != 1 {
+		t.Errorf("Expected 1 item in response, got %d", len(response))
 	}
 }
 
