@@ -71,6 +71,7 @@ func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 	if err != nil {
 		log.Println(err)
 		log.Printf("Error converting %s from Mountain to UTC\n", fullDateString)
+		return m, err
 	}
 	if entry.Price == "-" {
 		log.Println("Processed reproted prices. Setting price to be 0")

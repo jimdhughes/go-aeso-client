@@ -72,3 +72,63 @@ func TestMapReportValueToStructWhenHoursAndMinutesReturned(t *testing.T) {
 		t.Errorf("Expected %f, got %f", expectedMapping.AILDemand, mappedReport.AILDemand)
 	}
 }
+
+func TestInvalidDateFromResponse(t *testing.T) {
+	report := AesoReportEntry{
+		Date:         "ABCIsEasyAs123 01",
+		Price:        "100",
+		ThirtyDayAvg: "101",
+		AilDemand:    "102",
+	}
+	_, err := mapReportValueToStruct(report)
+	if err == nil {
+		t.Fail()
+	}
+}
+
+func TestInvalidPriceExpect0(t *testing.T) {
+	report := AesoReportEntry{
+		Date:         "2022-04-01 01",
+		Price:        "-",
+		ThirtyDayAvg: "101",
+		AilDemand:    "102",
+	}
+	mappedValue, err := mapReportValueToStruct(report)
+	if err != nil {
+		t.Error(err)
+	}
+	if mappedValue.Price != 0 {
+		t.Fail()
+	}
+}
+
+func TestInvalidEntryForThirtyDayAverageExpectError(t *testing.T) {
+	report := AesoReportEntry{
+		Date:         "2022-04-01 01",
+		Price:        "-",
+		ThirtyDayAvg: "xyz",
+		AilDemand:    "102",
+	}
+	mappedValue, err := mapReportValueToStruct(report)
+	if err == nil {
+		t.Error(err)
+	}
+	if mappedValue.ThirtyDayAvg != 0 {
+		t.Fail()
+	}
+}
+func TestInvalidAilDemandMappingExpectError(t *testing.T) {
+	report := AesoReportEntry{
+		Date:         "2022-04-01 01",
+		Price:        "-",
+		ThirtyDayAvg: "0",
+		AilDemand:    "abc",
+	}
+	mappedValue, err := mapReportValueToStruct(report)
+	if err == nil {
+		t.Error(err)
+	}
+	if mappedValue.ThirtyDayAvg != 0 {
+		t.Fail()
+	}
+}
