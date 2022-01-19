@@ -101,6 +101,21 @@ func TestInvalidPriceExpect0(t *testing.T) {
 		t.Fail()
 	}
 }
+func TestInvalidPriceExpecterror(t *testing.T) {
+	report := AesoReportEntry{
+		Date:         "2022-04-01 01",
+		Price:        "abcdefg",
+		ThirtyDayAvg: "101",
+		AilDemand:    "102",
+	}
+	mappedValue, err := mapReportValueToStruct(report)
+	if err == nil {
+		t.Error(err)
+	}
+	if mappedValue.Price != 0 {
+		t.Fail()
+	}
+}
 
 func TestInvalidEntryForThirtyDayAverageExpectError(t *testing.T) {
 	report := AesoReportEntry{
