@@ -111,31 +111,6 @@ func mapAesoData(data AesoResponse) (GenerationInfo, error) {
 	return g, nil
 }
 
-// Probably not needed in the library. I used this for my other app
-func (g *GenerationInfo) ToTimeSeries() []TimeSeriesMeasurement {
-	var timeSeries []TimeSeriesMeasurement
-	// MC
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("mc", "coal", g.MaxCapacity.Coal)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("mc", "gas", g.MaxCapacity.Gas)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("mc", "hydro", g.MaxCapacity.Hydro)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("mc", "other", g.MaxCapacity.Other)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("mc", "wind", g.MaxCapacity.Wind)...)
-
-	// dcr
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("dcr", "coal", g.DispatchedContingencyReserve.Coal)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("dcr", "gas", g.DispatchedContingencyReserve.Gas)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("dcr", "hydro", g.DispatchedContingencyReserve.Hydro)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("dcr", "other", g.DispatchedContingencyReserve.Other)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("dcr", "wind", g.DispatchedContingencyReserve.Wind)...)
-	// tng
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("tng", "coal", g.TotalNetGeneration.Coal)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("tng", "gas", g.TotalNetGeneration.Gas)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("tng", "hydro", g.TotalNetGeneration.Hydro)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("tng", "other", g.TotalNetGeneration.Other)...)
-	timeSeries = append(timeSeries, convertMeasurementToTimeseriesMeasurement("tng", "wind", g.TotalNetGeneration.Wind)...)
-	return timeSeries
-}
-
 // extractAESOMeasurements takes the expected array of [][]int and returns an array of Measurements for easier debugging
 // Integer array has the structure [[unixTimestamp, value]] where unixTimestamp is the date/time and measurement is MWH produced
 func extractAESOMeasurements(input [][]int) []Measurement {
@@ -148,18 +123,4 @@ func extractAESOMeasurements(input [][]int) []Measurement {
 		measurements = append(measurements, measurement)
 	}
 	return measurements
-}
-
-func convertMeasurementToTimeseriesMeasurement(measurement, source string, measurements []Measurement) []TimeSeriesMeasurement {
-	var ts []TimeSeriesMeasurement
-	for _, entry := range measurements {
-		t := TimeSeriesMeasurement{
-			Measurement: measurement,
-			Source:      source,
-			Value:       entry.Measure,
-			Timestamp:   int(entry.Date.Unix()),
-		}
-		ts = append(ts, t)
-	}
-	return ts
 }

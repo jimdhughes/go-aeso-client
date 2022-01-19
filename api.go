@@ -8,6 +8,7 @@ import (
 )
 
 const AESO_AUTH_HEADER = "X-API-Key"
+const ERR_INVALID_RESPONSE_CODE = "invalid response code received"
 
 type AesoError struct {
 	Timestamp string `json:"timestamp"`
@@ -16,25 +17,32 @@ type AesoError struct {
 }
 
 type AesoApiService struct {
-	apiKey string
+	apiKey     string
+	httpClient HTTPClient
+}
+
+// HTTPClient as an interface to allow mocking
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
 }
 
 func (a *AesoApiService) execute(url string) ([]byte, error) {
-	client := &http.Client{}
 	log.Printf("Getting: %s\n", url)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Println(err)
 		return []byte{}, nil
 	}
+	//should we validate again that the apiKey is set?
 	req.Header.Set(AESO_AUTH_HEADER, a.apiKey)
-	res, err := client.Do(req)
+	res, err := a.httpClient.Do(req)
 	if err != nil {
 		log.Println(err)
-		return []byte{}, nil
+		return []byte{}, err
 	}
 	if res.StatusCode >= 400 {
-		log.Println("non-200 status code received")
+		log.Println("non-success status code received")
+		return []byte{}, errors.New(ERR_INVALID_RESPONSE_CODE)
 	}
 	defer res.Body.Close()
 	buffer, err := io.ReadAll(res.Body)
@@ -49,6 +57,7 @@ func NewAesoApiService(key string) (AesoApiService, error) {
 		return AesoApiService{}, errors.New("AESO API key is required")
 	}
 	return AesoApiService{
-		apiKey: key,
+		apiKey:     key,
+		httpClient: &http.Client{},
 	}, nil
 }
