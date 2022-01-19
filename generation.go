@@ -51,29 +51,38 @@ type AesoResponse struct {
 	TotalNetGeneration           AesoSource `json:"tng"`
 }
 
-func (a *AesoApiService) GetGenerationData() GenerationInfo {
-	aesoRes := getData()
-	return mapAesoData(aesoRes)
+func (a *AesoApiService) GetGenerationData() (GenerationInfo, error) {
+	aesoRes, err := getData()
+	if err != nil {
+		return GenerationInfo{}, nil
+	}
+	mappedResponse, err := mapAesoData(aesoRes)
+	if err != nil {
+		return GenerationInfo{}, nil
+	}
+	return mappedResponse, nil
 }
 
-func getData() AesoResponse {
+func getData() (AesoResponse, error) {
 	client := http.Client{}
 	resp, err := client.Get(AESO_API_URL_GENERATION)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return AesoResponse{}, err
 	}
 	defer resp.Body.Close()
 	var data AesoResponse
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&data)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return AesoResponse{}, err
 	}
-	return data
+	return data, nil
 }
 
 // mapAesoData takes the AesoResponse from the API and maps it to a GenerationInfo struct
-func mapAesoData(data AesoResponse) GenerationInfo {
+func mapAesoData(data AesoResponse) (GenerationInfo, error) {
 	g := GenerationInfo{
 		Updated:                      data.Updated,
 		MaxCapacity:                  Source{},
@@ -99,7 +108,7 @@ func mapAesoData(data AesoResponse) GenerationInfo {
 	g.TotalNetGeneration.Hydro = extractAESOMeasurements(data.TotalNetGeneration.Hydro)
 	g.TotalNetGeneration.Wind = extractAESOMeasurements(data.TotalNetGeneration.Wind)
 	g.TotalNetGeneration.Other = extractAESOMeasurements(data.TotalNetGeneration.Other)
-	return g
+	return g, nil
 }
 
 // Probably not needed in the library. I used this for my other app
