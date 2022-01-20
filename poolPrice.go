@@ -70,7 +70,7 @@ func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 		timePartsString = timePartsString[0:2] // we expect to only get the hour back in this API call
 	}
 	fullDateString := fmt.Sprintf("%s %s:59:59", datePartString, timePartsString)
-	date, err := ConvertAesoDateToUTC(fullDateString)
+	date, err := ConvertAesoDateToUTC(fullDateString, "2006-01-02 15:04:05")
 	if err != nil {
 		log.Println(err)
 		log.Printf("Error converting %s from Mountain to UTC\n", fullDateString)

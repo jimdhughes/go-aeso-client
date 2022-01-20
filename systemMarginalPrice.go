@@ -67,7 +67,7 @@ func mapAesoSystemMarginalPriceToStruct(entry AesoSystemMarginalPriceReport) (Ma
 	datePartString := parts[0]
 	timePartsString := parts[1]
 	fullDateString := fmt.Sprintf("%s %s:00", datePartString, entry.Time)
-	date, err := ConvertAesoDateToUTC(fullDateString)
+	date, err := ConvertAesoDateToUTC(fullDateString, "01/02/2006 15:04:05")
 	if err != nil {
 		log.Println(err)
 		log.Printf("Error converting %s from Mountain to UTC\n", fullDateString)
