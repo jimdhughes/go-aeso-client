@@ -15,7 +15,7 @@ func TestMapReportValueToStruct(t *testing.T) {
 	}
 	// what do we expect the value to be?
 	expectedMapping := MappedPoolPrice{
-		Date:         time.Date(2022, 4, 1, 7, 59, 59, 0, time.UTC),
+		Date:         time.Date(2022, 4, 1, 6, 59, 59, 0, time.UTC),
 		Price:        100,
 		ThirtyDayAvg: 101,
 		AILDemand:    102,
@@ -90,15 +90,15 @@ func TestInvalidPriceExpect0(t *testing.T) {
 	report := AesoReportEntry{
 		Date:         "04/01/2022 01",
 		Price:        "-",
-		ThirtyDayAvg: "101",
-		AilDemand:    "102",
+		ThirtyDayAvg: "-",
+		AilDemand:    "-",
 	}
 	mappedValue, err := mapReportValueToStruct(report)
 	if err != nil {
 		t.Error(err)
 	}
-	if mappedValue.Price != 0 {
-		t.Fail()
+	if mappedValue.Price != 0 || mappedValue.AILDemand != 0 || mappedValue.ThirtyDayAvg != 0 {
+		t.Errorf("Expected price:0, ailDemand:0, thirtyDayAvg:0, got %f, %f, %f", mappedValue.Price, mappedValue.AILDemand, mappedValue.ThirtyDayAvg)
 	}
 }
 func TestInvalidPriceExpecterror(t *testing.T) {

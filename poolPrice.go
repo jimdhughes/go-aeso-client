@@ -78,8 +78,15 @@ func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 		log.Printf("Error converting %s from Mountain to UTC\n", fullDateString)
 		return m, err
 	}
+	//sanitize - as 0's for entries that are not available
 	if entry.Price == "-" {
 		entry.Price = "0"
+	}
+	if entry.ThirtyDayAvg == "-" {
+		entry.ThirtyDayAvg = "0"
+	}
+	if entry.AilDemand == "-" {
+		entry.AilDemand = "0"
 	}
 	price, err := strconv.ParseFloat(entry.Price, 64)
 	if err != nil {
