@@ -147,3 +147,19 @@ func TestInvalidAilDemandMappingExpectError(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestPoolPriceMappingForHourEnding24(t *testing.T) {
+	report := AesoReportEntry{
+		Date:         "04/01/2022 24",
+		Price:        "5",
+		ThirtyDayAvg: "0",
+		AilDemand:    "0",
+	}
+	mappedValue, err := mapReportValueToStruct(report)
+	if err != nil {
+		t.Error(err)
+	}
+	if mappedValue.Date.Hour() != 5 {
+		t.Errorf("Expected %d got %d", 6, mappedValue.Date.Hour())
+	}
+}
