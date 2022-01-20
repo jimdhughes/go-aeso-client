@@ -50,7 +50,7 @@ func TestMapReportValueToStructWhenHoursAndMinutesReturned(t *testing.T) {
 	}
 	// what do we expect the value to be?
 	expectedMapping := MappedPoolPrice{
-		Date:         time.Date(2022, 4, 1, 7, 59, 59, 0, time.UTC),
+		Date:         time.Date(2022, 4, 1, 6, 59, 59, 0, time.UTC),
 		Price:        100,
 		ThirtyDayAvg: 101,
 		AILDemand:    102,
