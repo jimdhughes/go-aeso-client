@@ -3,7 +3,6 @@ package aeso
 import (
 	"errors"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -27,7 +26,6 @@ type HTTPClient interface {
 }
 
 func (a *AesoApiService) execute(url string) ([]byte, error) {
-	log.Printf("Getting: %s\n", url)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return []byte{}, nil
