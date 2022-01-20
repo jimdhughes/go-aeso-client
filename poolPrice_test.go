@@ -8,7 +8,7 @@ import (
 func TestMapReportValueToStruct(t *testing.T) {
 	// create an AesoReport item
 	report := AesoReportEntry{
-		Date:         "2022-04-01 01",
+		Date:         "04/01/2022 01",
 		Price:        "100",
 		ThirtyDayAvg: "101",
 		AilDemand:    "102",
@@ -43,7 +43,7 @@ func TestMapReportValueToStruct(t *testing.T) {
 func TestMapReportValueToStructWhenHoursAndMinutesReturned(t *testing.T) {
 	// this test is to ensure that should the API change, we won't break our expected "hour represents hour ending" requirement
 	report := AesoReportEntry{
-		Date:         "2022-04-01 01:01",
+		Date:         "04/01/2022 01:01",
 		Price:        "100",
 		ThirtyDayAvg: "101",
 		AilDemand:    "102",
@@ -88,7 +88,7 @@ func TestInvalidDateFromResponse(t *testing.T) {
 
 func TestInvalidPriceExpect0(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "2022-04-01 01",
+		Date:         "04/01/2022 01",
 		Price:        "-",
 		ThirtyDayAvg: "101",
 		AilDemand:    "102",
@@ -103,7 +103,7 @@ func TestInvalidPriceExpect0(t *testing.T) {
 }
 func TestInvalidPriceExpecterror(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "2022-04-01 01",
+		Date:         "04/01/2022 01",
 		Price:        "abcdefg",
 		ThirtyDayAvg: "101",
 		AilDemand:    "102",
@@ -119,7 +119,7 @@ func TestInvalidPriceExpecterror(t *testing.T) {
 
 func TestInvalidEntryForThirtyDayAverageExpectError(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "2022-04-01 01",
+		Date:         "04/01/2022 01",
 		Price:        "-",
 		ThirtyDayAvg: "xyz",
 		AilDemand:    "102",
@@ -134,7 +134,7 @@ func TestInvalidEntryForThirtyDayAverageExpectError(t *testing.T) {
 }
 func TestInvalidAilDemandMappingExpectError(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "2022-04-01 01",
+		Date:         "04/01/2022 01",
 		Price:        "-",
 		ThirtyDayAvg: "0",
 		AilDemand:    "abc",

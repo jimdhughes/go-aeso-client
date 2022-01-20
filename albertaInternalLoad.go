@@ -3,7 +3,6 @@ package aeso
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 )
@@ -49,7 +48,7 @@ func (a *AesoApiService) GetAlbertaInternalLoad(start, end time.Time) ([]MappedA
 	for _, entry := range aesoRes.Return.Report {
 		mapped, err := mapResponseToInternalLoadStruct(entry)
 		if err != nil {
-			log.Println(err)
+
 			return []MappedAlbertaInternalLoad{}, err
 		}
 		res = append(res, mapped)

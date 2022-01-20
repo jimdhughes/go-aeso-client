@@ -30,18 +30,15 @@ func (a *AesoApiService) execute(url string) ([]byte, error) {
 	log.Printf("Getting: %s\n", url)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		log.Println(err)
 		return []byte{}, nil
 	}
 	//should we validate again that the apiKey is set?
 	req.Header.Set(AESO_AUTH_HEADER, a.apiKey)
 	res, err := a.httpClient.Do(req)
 	if err != nil {
-		log.Println(err)
 		return []byte{}, err
 	}
 	if res.StatusCode >= 400 {
-		log.Println("non-success status code received")
 		return []byte{}, errors.New(ERR_INVALID_RESPONSE_CODE)
 	}
 	defer res.Body.Close()

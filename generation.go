@@ -2,7 +2,6 @@ package aeso
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 )
@@ -67,7 +66,6 @@ func getData() (AesoResponse, error) {
 	client := http.Client{}
 	resp, err := client.Get(AESO_API_URL_GENERATION)
 	if err != nil {
-		log.Println(err)
 		return AesoResponse{}, err
 	}
 	defer resp.Body.Close()
@@ -75,7 +73,6 @@ func getData() (AesoResponse, error) {
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(&data)
 	if err != nil {
-		log.Println(err)
 		return AesoResponse{}, err
 	}
 	return data, nil

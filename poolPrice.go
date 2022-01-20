@@ -46,13 +46,11 @@ func (a *AesoApiService) GetPoolPrice(start, end time.Time) ([]MappedPoolPrice, 
 	}
 	err = json.Unmarshal(bytes, &aesoRes)
 	if err != nil {
-		log.Println(err)
 		return []MappedPoolPrice{}, err
 	}
 	for _, entry := range aesoRes.Return.Report {
 		mapped, err := mapReportValueToStruct(entry)
 		if err != nil {
-			log.Println(err)
 			return []MappedPoolPrice{}, err
 		}
 		res = append(res, mapped)
@@ -70,19 +68,16 @@ func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 		timePartsString = timePartsString[0:2] // we expect to only get the hour back in this API call
 	}
 	fullDateString := fmt.Sprintf("%s %s:59:59", datePartString, timePartsString)
-	date, err := ConvertAesoDateToUTC(fullDateString, "2006-01-02 15:04:05")
+	date, err := ConvertAesoDateToUTC(fullDateString, "01/02/2006 15:04:05")
 	if err != nil {
-		log.Println(err)
 		log.Printf("Error converting %s from Mountain to UTC\n", fullDateString)
 		return m, err
 	}
 	if entry.Price == "-" {
-		log.Println("Processed reproted prices. Setting price to be 0")
 		entry.Price = "0"
 	}
 	price, err := strconv.ParseFloat(entry.Price, 64)
 	if err != nil {
-		log.Println(err)
 		return m, err
 	}
 	thirtyDayAvg, err := strconv.ParseFloat(entry.ThirtyDayAvg, 64)

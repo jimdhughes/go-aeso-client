@@ -3,7 +3,6 @@ package aeso
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -42,17 +41,15 @@ func (a *AesoApiService) GetSystemMarginalPrice(start, end time.Time) ([]MappedS
 	eDateString := end.Format("2006-01-02")
 	bytes, err := a.execute(fmt.Sprintf(AESO_API_URL_SYSTEMMARGINALPRICE, sDateString, eDateString))
 	if err != nil {
-		log.Println(err)
 		return []MappedSystemMarginalPrice{}, err
 	}
 	err = json.Unmarshal(bytes, &response)
 	if err != nil {
-		log.Fatal(err)
+		return []MappedSystemMarginalPrice{}, err
 	}
 	for _, entry := range response.Return.Report {
 		mappedValue, err := mapAesoSystemMarginalPriceToStruct(entry)
 		if err != nil {
-			log.Println(err)
 			return []MappedSystemMarginalPrice{}, err
 		}
 		res = append(res, mappedValue)
@@ -69,25 +66,20 @@ func mapAesoSystemMarginalPriceToStruct(entry AesoSystemMarginalPriceReport) (Ma
 	fullDateString := fmt.Sprintf("%s %s:00", datePartString, entry.Time)
 	date, err := ConvertAesoDateToUTC(fullDateString, "01/02/2006 15:04:05")
 	if err != nil {
-		log.Println(err)
-		log.Printf("Error converting %s from Mountain to UTC\n", fullDateString)
 		return MappedSystemMarginalPrice{}, err
 	}
 
 	h, err := strconv.ParseInt(timePartsString, 10, 64)
 	if err != nil {
-		log.Println(err)
 		return MappedSystemMarginalPrice{}, err
 	}
 
 	price, err := strconv.ParseFloat(entry.PriceInDollar, 64)
 	if err != nil {
-		log.Println(err)
 		return MappedSystemMarginalPrice{}, err
 	}
 	volume, err := strconv.ParseFloat(entry.VolumeInMW, 64)
 	if err != nil {
-		log.Println(err)
 		return MappedSystemMarginalPrice{}, err
 	}
 	return MappedSystemMarginalPrice{
