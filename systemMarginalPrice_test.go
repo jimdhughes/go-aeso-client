@@ -53,7 +53,28 @@ func TestMockedSystemMarginalPriceCall(t *testing.T) {
 	if result[0].Date.Year() != 2022 {
 		t.Errorf("Expected: 2022, Actual: %v", result[0].Date.Year())
 	}
+}
 
+func TestMapSystemMarginalPriceReportToStructWithValidResponseInvalidTime(t *testing.T) {
+	report := AesoSystemMarginalPriceReport{
+		DateHourEnding: "01/19/2022 24",
+		Time:           "24:59",
+		PriceInDollar:  "1.0",
+		VolumeInMW:     "2.0",
+	}
+	expected := MappedSystemMarginalPrice{
+		Date:       time.Date(2022, 1, 19, 07, 59, 0, 0, time.UTC),
+		Price:      1.0,
+		VolumeInMW: 2.0,
+		HourEnding: 24,
+	}
+	result, err := mapAesoSystemMarginalPriceToStruct(report)
+	if err != nil {
+		t.Errorf("Error: %v", err)
+	}
+	if result != expected {
+		t.Errorf("Expected: %v, Actual: %v", expected, result)
+	}
 }
 
 func init() {
