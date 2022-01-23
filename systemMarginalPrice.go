@@ -3,7 +3,6 @@ package aeso
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -64,9 +63,7 @@ func mapAesoSystemMarginalPriceToStruct(entry AesoSystemMarginalPriceReport) (Ma
 	parts := strings.Split(entry.DateHourEnding, " ")
 	datePartString := parts[0]
 	timePartsString := parts[1]
-	log.Println(entry.Time[0:2])
 	if entry.Time[0:2] == "24" {
-
 		// The AESO for some reason treats hour 0 as hour 24. We need to correct this.
 		entry.Time = "00" + entry.Time[2:]
 	}
