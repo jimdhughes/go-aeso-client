@@ -18,7 +18,7 @@ func TestMapSystemMarginalPriceReportToStruct(t *testing.T) {
 		VolumeInMW:     "2.0",
 	}
 	expected := MappedSystemMarginalPrice{
-		Date:       time.Date(2022, 1, 20, 06, 59, 0, 0, time.UTC),
+		Date:       time.Date(2022, 1, 20, 05, 59, 0, 0, time.UTC),
 		Price:      1.0,
 		VolumeInMW: 2.0,
 		HourEnding: 24,
@@ -63,7 +63,7 @@ func TestMapSystemMarginalPriceReportToStructWithValidResponseInvalidTime(t *tes
 		VolumeInMW:     "2.0",
 	}
 	expected := MappedSystemMarginalPrice{
-		Date:       time.Date(2022, 1, 19, 07, 59, 0, 0, time.UTC),
+		Date:       time.Date(2022, 1, 20, 06, 59, 0, 0, time.UTC),
 		Price:      1.0,
 		VolumeInMW: 2.0,
 		HourEnding: 24,
