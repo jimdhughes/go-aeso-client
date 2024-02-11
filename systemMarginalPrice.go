@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const AESO_API_URL_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1/systemMarginalPrice?startDate=%s&endDate=%s"
+const AESO_API_URL_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/systemMarginalPrice?startDate=%s&endDate=%s"
 
 type MappedSystemMarginalPrice struct {
 	Date       time.Time `json:"date"`

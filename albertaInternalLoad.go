@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const AESO_API_URL_ALBERTAINTERNALLOAD = "https://api.aeso.ca/report/v1/load/albertaInternalLoad?startDate=%s&endDate=%s"
+const AESO_API_URL_ALBERTAINTERNALLOAD = "https://api.aeso.ca/report/v1.1/load/albertaInternalLoad?startDate=%s&endDate=%s"
 
 type MappedAlbertaInternalLoad struct {
 	BeginDateTimeUTC            time.Time `json:"beginDateTimeUTC"`
