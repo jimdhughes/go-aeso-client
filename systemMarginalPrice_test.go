@@ -2,7 +2,7 @@ package aeso
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -34,7 +34,7 @@ func TestMapSystemMarginalPriceReportToStruct(t *testing.T) {
 
 func TestMockedSystemMarginalPriceCall(t *testing.T) {
 	const json = `{"timestamp": "2022-01-20 01:53:16.840+0000","responseCode": "200","return": {"System Marginal Price Report": [{"dateHourEnding": "01/18/2022 24","time": "23:56","priceInDollar": "84.06","volumeInMW": "80"}]}}`
-	r := ioutil.NopCloser(bytes.NewReader([]byte(json)))
+	r := io.NopCloser(bytes.NewReader([]byte(json)))
 	mocks.GetDoFunc = func(req *http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: 200,

@@ -8,7 +8,8 @@ import (
 	"time"
 )
 
-const AESO_API_URL_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/systemMarginalPrice?startDate=%s&endDate=%s"
+const AESO_API_URL_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/price/systemMarginalPrice?startDate=%s&endDate=%s"
+const AESO_API_URL_CURRENT_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/price/systemMarginalPrice/current"
 
 type MappedSystemMarginalPrice struct {
 	Date       time.Time `json:"date"`
@@ -40,6 +41,27 @@ func (a *AesoApiService) GetSystemMarginalPrice(start, end time.Time) ([]MappedS
 	sDateString := start.Format("2006-01-02")
 	eDateString := end.Format("2006-01-02")
 	bytes, err := a.execute(fmt.Sprintf(AESO_API_URL_SYSTEMMARGINALPRICE, sDateString, eDateString))
+	if err != nil {
+		return []MappedSystemMarginalPrice{}, err
+	}
+	err = json.Unmarshal(bytes, &response)
+	if err != nil {
+		return []MappedSystemMarginalPrice{}, err
+	}
+	for _, entry := range response.Return.Report {
+		mappedValue, err := mapAesoSystemMarginalPriceToStruct(entry)
+		if err != nil {
+			return []MappedSystemMarginalPrice{}, err
+		}
+		res = append(res, mappedValue)
+	}
+	return res, nil
+}
+
+func (a *AesoApiService) GetCurrentSystemMarginalPrice() ([]MappedSystemMarginalPrice, error) {
+	var response AesoSystemMarginalPriceResponse
+	var res []MappedSystemMarginalPrice
+	bytes, err := a.execute(AESO_API_URL_CURRENT_SYSTEMMARGINALPRICE)
 	if err != nil {
 		return []MappedSystemMarginalPrice{}, err
 	}

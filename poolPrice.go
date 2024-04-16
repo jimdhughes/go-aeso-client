@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const AESO_API_URL_POOLPRICE = "https://api.aeso.ca/report/v1.1/poolPrice?startDate=%s&endDate=%s"
+const AESO_API_URL_POOLPRICE = "https://api.aeso.ca/report/v1.1/price/poolPrice?startDate=%s&endDate=%s"
 
 type AesoReportEntry struct {
 	Date         string `json:"dateHourEnding"`
