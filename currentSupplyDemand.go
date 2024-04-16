@@ -1,5 +1,7 @@
 package aeso
 
+import "encoding/json"
+
 const AESO_API_URL_CURRENT_SUPPLY_DEMAND_SUMMARY = "https://api.aeso.ca/report/v1/csd/summary/current"
 
 type InterchangeEntry struct {
@@ -35,4 +37,17 @@ type CurrentSupplyDemandResponse struct {
 	Timestamp    string                   `json:"timestamp"`
 	ResponseCode string                   `json:"responseCode"`
 	Return       CurrentSupplyDemandEntry `json:"return"`
+}
+
+func (a *AesoApiService) GetCurrentSupplyDemandSummary() (CurrentSupplyDemandEntry, error) {
+	var aesoRes CurrentSupplyDemandResponse
+	bytes, err := a.execute(AESO_API_URL_CURRENT_SUPPLY_DEMAND_SUMMARY)
+	if err != nil {
+		return CurrentSupplyDemandEntry{}, err
+	}
+	err = json.Unmarshal(bytes, &aesoRes)
+	if err != nil {
+		return CurrentSupplyDemandEntry{}, err
+	}
+	return aesoRes.Return, nil
 }

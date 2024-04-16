@@ -1,5 +1,7 @@
 package aeso
 
+import "encoding/json"
+
 const AESO_API_URL_CURRENT_SUPPLY_DEMAND_ASSET = "https://api.aeso.ca/report/v1/csd/generation/assets/current"
 
 type AssetGenerationEntry struct {
@@ -21,4 +23,17 @@ type CurrentSupplyDemandAssetResponse struct {
 	Timestamp    string                        `json:"timestamp"`
 	ResponseCode string                        `json:"responseCode"`
 	Return       CurrentSupplyDemandAssetEntry `json:"return"`
+}
+
+func (a *AesoApiService) GetCurrentSupplyDemandAsset() (CurrentSupplyDemandAssetEntry, error) {
+	var aesoRes CurrentSupplyDemandAssetResponse
+	bytes, err := a.execute(AESO_API_URL_CURRENT_SUPPLY_DEMAND_ASSET)
+	if err != nil {
+		return CurrentSupplyDemandAssetEntry{}, err
+	}
+	err = json.Unmarshal(bytes, &aesoRes)
+	if err != nil {
+		return CurrentSupplyDemandAssetEntry{}, err
+	}
+	return aesoRes.Return, nil
 }
