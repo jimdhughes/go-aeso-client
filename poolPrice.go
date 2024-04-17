@@ -12,10 +12,11 @@ import (
 const AESO_API_URL_POOLPRICE = "https://api.aeso.ca/report/v1.1/price/poolPrice?startDate=%s&endDate=%s"
 
 type AesoReportEntry struct {
-	Date         string `json:"dateHourEnding"`
-	Price        string `json:"priceInDollar"`
-	ThirtyDayAvg string `json:"averagePoolPrice"`
-	AilDemand    string `json:"ailDemand"`
+	BeginDateTimeUTC        string `json:"begin_datetime_utc"`
+	BeginDateTimeMPT        string `json:"begin_datetime_mpt"`
+	PoolPrice               string `json:"pool_price"`
+	ForecastPoolPrice       string `json:"forecast_pool_price"`
+	RollingThirtyDayAverage string `json:"rolling_thirty_day_average"`
 }
 
 type AesoPoolResponse struct {
@@ -29,10 +30,10 @@ type AesoPoolResponseReportPart struct {
 }
 
 type MappedPoolPrice struct {
-	Date         time.Time `json:"date"`
-	Price        float64   `json:"price"`
-	ThirtyDayAvg float64   `json:"thirtyDayAvg"`
-	AILDemand    float64   `json:"ailDemand"`
+	BeginDateTimeUTC        time.Time `json:"begin_datetime_utc"`
+	PoolPrice               float64   `json:"pool_price"`
+	ForecastPoolPrice       float64   `json:"forecast_pool_price"`
+	RollingThirtyDayAverage float64   `json:"rolling_thirty_day_average"`
 }
 
 func (a *AesoApiService) GetPoolPrice(start, end time.Time) ([]MappedPoolPrice, error) {
@@ -60,8 +61,8 @@ func (a *AesoApiService) GetPoolPrice(start, end time.Time) ([]MappedPoolPrice, 
 
 func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 	var m MappedPoolPrice
-	// Date comes back as yyyy-mm-dd HH where HH is the hour ending (so HH:59)
-	parts := strings.Split(entry.Date, " ")
+	// extract UTC time
+	parts := strings.Split(entry.BeginDateTimeUTC, " ")
 	datePartString := parts[0]
 	timePartsString := parts[1]
 	if len(timePartsString) > 2 {
@@ -79,33 +80,33 @@ func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 		return m, err
 	}
 	//sanitize - as 0's for entries that are not available
-	if entry.Price == "-" {
-		entry.Price = "0"
+	if entry.PoolPrice == "-" {
+		entry.PoolPrice = "0"
 	}
-	if entry.ThirtyDayAvg == "-" {
-		entry.ThirtyDayAvg = "0"
+	if entry.RollingThirtyDayAverage == "-" {
+		entry.RollingThirtyDayAverage = "0"
 	}
-	if entry.AilDemand == "-" {
-		entry.AilDemand = "0"
+	if entry.ForecastPoolPrice == "-" {
+		entry.ForecastPoolPrice = "0"
 	}
-	price, err := strconv.ParseFloat(entry.Price, 64)
+	price, err := strconv.ParseFloat(entry.PoolPrice, 64)
 	if err != nil {
 		return m, err
 	}
-	thirtyDayAvg, err := strconv.ParseFloat(entry.ThirtyDayAvg, 64)
+	thirtyDayAvg, err := strconv.ParseFloat(entry.RollingThirtyDayAverage, 64)
 	if err != nil {
 		thirtyDayAvg = 0
 		return m, err
 	}
-	ailDemand, err := strconv.ParseFloat(entry.AilDemand, 64)
+	ailDemand, err := strconv.ParseFloat(entry.ForecastPoolPrice, 64)
 	if err != nil {
 		return m, err
 	}
 	m = MappedPoolPrice{
-		Date:         date,
-		Price:        price,
-		ThirtyDayAvg: thirtyDayAvg,
-		AILDemand:    ailDemand,
+		BeginDateTimeUTC:        date,
+		PoolPrice:               price,
+		RollingThirtyDayAverage: thirtyDayAvg,
+		ForecastPoolPrice:       ailDemand,
 	}
 	return m, nil
 }
