@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -62,19 +61,8 @@ func (a *AesoApiService) GetPoolPrice(start, end time.Time) ([]MappedPoolPrice, 
 func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 	var m MappedPoolPrice
 	// extract UTC time
-	parts := strings.Split(entry.BeginDateTimeUTC, " ")
-	datePartString := parts[0]
-	timePartsString := parts[1]
-	if len(timePartsString) > 2 {
-		timePartsString = timePartsString[0:2] // we expect to only get the hour back in this API call
-	}
-	timeInt, err := strconv.Atoi(timePartsString)
-	if err != nil {
-		return m, err
-	}
-	timeInt = timeInt - 1 // we want the hour ending, not the hour beginning
-	fullDateString := fmt.Sprintf("%s %d:59:59", datePartString, timeInt)
-	date, err := ConvertAesoDateToUTC(fullDateString, "01/02/2006 15:04:05")
+	fullDateString := fmt.Sprintf(entry.BeginDateTimeUTC)
+	date, err := time.Parse("2006-01-02 15:04", entry.BeginDateTimeUTC)
 	if err != nil {
 		log.Printf("Error converting %s from Mountain to UTC\n", fullDateString)
 		return m, err
@@ -95,10 +83,9 @@ func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 	}
 	thirtyDayAvg, err := strconv.ParseFloat(entry.RollingThirtyDayAverage, 64)
 	if err != nil {
-		thirtyDayAvg = 0
 		return m, err
 	}
-	ailDemand, err := strconv.ParseFloat(entry.ForecastPoolPrice, 64)
+	forecastPoolPrice, err := strconv.ParseFloat(entry.ForecastPoolPrice, 64)
 	if err != nil {
 		return m, err
 	}
@@ -106,7 +93,7 @@ func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 		BeginDateTimeUTC:        date,
 		PoolPrice:               price,
 		RollingThirtyDayAverage: thirtyDayAvg,
-		ForecastPoolPrice:       ailDemand,
+		ForecastPoolPrice:       forecastPoolPrice,
 	}
 	return m, nil
 }
