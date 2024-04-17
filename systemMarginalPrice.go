@@ -11,9 +11,9 @@ const AESO_API_URL_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/price/
 const AESO_API_URL_CURRENT_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/price/systemMarginalPrice/current"
 
 type MappedSystemMarginalPrice struct {
-	BeginDateTimeUTC    time.Time `json:"beginDateTimeUTC"`
-	EndDateTimeUTC      time.Time `json:"endDateTimeUTC"`
-	SystemMarginalPrice float64   `json:"systemMarginalPrice"`
+	BeginDateTimeUTC    time.Time `json:"begin_datetime_utc"`
+	EndDateTimeUTC      time.Time `json:"end_datetime_utc"`
+	SystemMarginalPrice float64   `json:"system_marginal_price"`
 	Volume              float64   `json:"volume"`
 }
 
