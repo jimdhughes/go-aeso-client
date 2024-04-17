@@ -8,17 +8,17 @@ import (
 func TestMapReportValueToStruct(t *testing.T) {
 	// create an AesoReport item
 	report := AesoReportEntry{
-		Date:         "04/01/2022 01",
-		Price:        "100",
-		ThirtyDayAvg: "101",
-		AilDemand:    "102",
+		BeginDateTimeUTC:        "2024-04-01 01:00",
+		PoolPrice:               "16.36",
+		RollingThirtyDayAverage: "15.85",
+		ForecastPoolPrice:       "62.90",
 	}
 	// what do we expect the value to be?
 	expectedMapping := MappedPoolPrice{
-		Date:         time.Date(2022, 4, 1, 6, 59, 59, 0, time.UTC),
-		Price:        100,
-		ThirtyDayAvg: 101,
-		AILDemand:    102,
+		BeginDateTimeUTC:        time.Date(2024, 4, 1, 1, 0, 0, 0, time.UTC),
+		PoolPrice:               16.36,
+		RollingThirtyDayAverage: 15.85,
+		ForecastPoolPrice:       62.90,
 	}
 
 	// map the report to the struct
@@ -26,59 +26,26 @@ func TestMapReportValueToStruct(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	if mappedReport.Date != expectedMapping.Date {
-		t.Errorf("Expected %s, got %s", expectedMapping.Date, mappedReport.Date)
+	if mappedReport.BeginDateTimeUTC != expectedMapping.BeginDateTimeUTC {
+		t.Errorf("Expected BeginDateTimeUTC %s, got %s", expectedMapping.BeginDateTimeUTC, mappedReport.BeginDateTimeUTC)
 	}
-	if mappedReport.Price != expectedMapping.Price {
-		t.Errorf("Expected %f, got %f", expectedMapping.Price, mappedReport.Price)
+	if mappedReport.PoolPrice != expectedMapping.PoolPrice {
+		t.Errorf("Expected PoolPrice %f, got %f", expectedMapping.PoolPrice, mappedReport.PoolPrice)
 	}
-	if mappedReport.ThirtyDayAvg != expectedMapping.ThirtyDayAvg {
-		t.Errorf("Expected %f, got %f", expectedMapping.ThirtyDayAvg, mappedReport.ThirtyDayAvg)
+	if mappedReport.RollingThirtyDayAverage != expectedMapping.RollingThirtyDayAverage {
+		t.Errorf("Expected RollingThirtyDayAverage %f, got %f", expectedMapping.RollingThirtyDayAverage, mappedReport.RollingThirtyDayAverage)
 	}
-	if mappedReport.AILDemand != expectedMapping.AILDemand {
-		t.Errorf("Expected %f, got %f", expectedMapping.AILDemand, mappedReport.AILDemand)
-	}
-}
-
-func TestMapReportValueToStructWhenHoursAndMinutesReturned(t *testing.T) {
-	// this test is to ensure that should the API change, we won't break our expected "hour represents hour ending" requirement
-	report := AesoReportEntry{
-		Date:         "04/01/2022 01:01",
-		Price:        "100",
-		ThirtyDayAvg: "101",
-		AilDemand:    "102",
-	}
-	// what do we expect the value to be?
-	expectedMapping := MappedPoolPrice{
-		Date:         time.Date(2022, 4, 1, 6, 59, 59, 0, time.UTC),
-		Price:        100,
-		ThirtyDayAvg: 101,
-		AILDemand:    102,
-	}
-	mappedReport, err := mapReportValueToStruct(report)
-	if err != nil {
-		t.Fail()
-	}
-	if mappedReport.Date != expectedMapping.Date {
-		t.Errorf("Expected %s, got %s", expectedMapping.Date, mappedReport.Date)
-	}
-	if mappedReport.Price != expectedMapping.Price {
-		t.Errorf("Expected %f, got %f", expectedMapping.Price, mappedReport.Price)
-	}
-	if mappedReport.ThirtyDayAvg != expectedMapping.ThirtyDayAvg {
-		t.Errorf("Expected %f, got %f", expectedMapping.ThirtyDayAvg, mappedReport.ThirtyDayAvg)
-	}
-	if mappedReport.AILDemand != expectedMapping.AILDemand {
-		t.Errorf("Expected %f, got %f", expectedMapping.AILDemand, mappedReport.AILDemand)
+	if mappedReport.ForecastPoolPrice != expectedMapping.ForecastPoolPrice {
+		t.Errorf("Expected ForecastPoolPrice %f, got %f", expectedMapping.ForecastPoolPrice, mappedReport.ForecastPoolPrice)
 	}
 }
 
 func TestInvalidDateFromResponse(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "ABCIsEasyAs123 01",
-		Price:        "100",
-		ThirtyDayAvg: "101",
-		AilDemand:    "102",
+		BeginDateTimeUTC:        "ABCIsEasyAs123 01",
+		PoolPrice:               "100",
+		RollingThirtyDayAverage: "101",
+		ForecastPoolPrice:       "102",
 	}
 	_, err := mapReportValueToStruct(report)
 	if err == nil {
@@ -88,78 +55,80 @@ func TestInvalidDateFromResponse(t *testing.T) {
 
 func TestInvalidPriceExpect0(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "04/01/2022 01",
-		Price:        "-",
-		ThirtyDayAvg: "-",
-		AilDemand:    "-",
+		BeginDateTimeUTC:        "2022-04-01 01:00",
+		PoolPrice:               "-",
+		RollingThirtyDayAverage: "-",
+		ForecastPoolPrice:       "-",
 	}
 	mappedValue, err := mapReportValueToStruct(report)
 	if err != nil {
 		t.Error(err)
 	}
-	if mappedValue.Price != 0 || mappedValue.AILDemand != 0 || mappedValue.ThirtyDayAvg != 0 {
-		t.Errorf("Expected price:0, ailDemand:0, thirtyDayAvg:0, got %f, %f, %f", mappedValue.Price, mappedValue.AILDemand, mappedValue.ThirtyDayAvg)
+	if mappedValue.PoolPrice != 0 || mappedValue.RollingThirtyDayAverage != 0 || mappedValue.ForecastPoolPrice != 0 {
+		t.Errorf("Expected price:0, forecast:0, thirtyDayAvg:0, got %f, %f, %f", mappedValue.PoolPrice, mappedValue.ForecastPoolPrice, mappedValue.RollingThirtyDayAverage)
 	}
 }
+
 func TestInvalidPriceExpecterror(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "04/01/2022 01",
-		Price:        "abcdefg",
-		ThirtyDayAvg: "101",
-		AilDemand:    "102",
+		BeginDateTimeUTC:        "2022-04-01 01:00",
+		PoolPrice:               "abcdefg",
+		RollingThirtyDayAverage: "101",
+		ForecastPoolPrice:       "102",
 	}
 	mappedValue, err := mapReportValueToStruct(report)
 	if err == nil {
 		t.Error(err)
 	}
-	if mappedValue.Price != 0 {
+	if mappedValue.PoolPrice != 0 {
 		t.Fail()
 	}
 }
 
 func TestInvalidEntryForThirtyDayAverageExpectError(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "04/01/2022 01",
-		Price:        "-",
-		ThirtyDayAvg: "xyz",
-		AilDemand:    "102",
+		BeginDateTimeUTC:        "04/01/2022 01",
+		PoolPrice:               "-",
+		RollingThirtyDayAverage: "xyz",
+		ForecastPoolPrice:       "102",
 	}
 	mappedValue, err := mapReportValueToStruct(report)
 	if err == nil {
 		t.Error(err)
 	}
-	if mappedValue.ThirtyDayAvg != 0 {
+	if mappedValue.RollingThirtyDayAverage != 0 {
 		t.Fail()
 	}
 }
+
 func TestInvalidAilDemandMappingExpectError(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "04/01/2022 01",
-		Price:        "-",
-		ThirtyDayAvg: "0",
-		AilDemand:    "abc",
+		BeginDateTimeUTC:        "2022-04-01 01:00",
+		PoolPrice:               "-",
+		RollingThirtyDayAverage: "0",
+		ForecastPoolPrice:       "abc",
 	}
 	mappedValue, err := mapReportValueToStruct(report)
 	if err == nil {
 		t.Error(err)
 	}
-	if mappedValue.ThirtyDayAvg != 0 {
+	if mappedValue.RollingThirtyDayAverage != 0 {
 		t.Fail()
 	}
 }
 
 func TestPoolPriceMappingForHourEnding24(t *testing.T) {
 	report := AesoReportEntry{
-		Date:         "04/01/2022 24",
-		Price:        "5",
-		ThirtyDayAvg: "0",
-		AilDemand:    "0",
+		BeginDateTimeUTC:        "2022-04-01 23:00",
+		PoolPrice:               "5",
+		RollingThirtyDayAverage: "0",
+		ForecastPoolPrice:       "0",
 	}
 	mappedValue, err := mapReportValueToStruct(report)
 	if err != nil {
 		t.Error(err)
 	}
-	if mappedValue.Date.Hour() != 5 {
-		t.Errorf("Expected %d got %d", 6, mappedValue.Date.Hour())
+	if mappedValue.BeginDateTimeUTC.Hour() != 23 {
+		t.Errorf("Expected %d got %d", 23, mappedValue.BeginDateTimeUTC.Hour())
 	}
 }

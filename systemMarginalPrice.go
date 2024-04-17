@@ -4,24 +4,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 )
 
-const AESO_API_URL_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/systemMarginalPrice?startDate=%s&endDate=%s"
+const AESO_API_URL_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/price/systemMarginalPrice?startDate=%s&endDate=%s"
+const AESO_API_URL_CURRENT_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/price/systemMarginalPrice/current"
 
 type MappedSystemMarginalPrice struct {
-	Date       time.Time `json:"date"`
-	HourEnding int64     `json:"hourEnding"`
-	Price      float64   `json:"price"`
-	VolumeInMW float64   `json:"volumeInMW"`
+	BeginDateTimeUTC    time.Time `json:"begin_datetime_utc"`
+	EndDateTimeUTC      time.Time `json:"end_datetime_utc"`
+	SystemMarginalPrice float64   `json:"system_marginal_price"`
+	Volume              float64   `json:"volume"`
 }
 
 type AesoSystemMarginalPriceReport struct {
-	DateHourEnding string `json:"dateHourEnding"`
-	Time           string `json:"time"`
-	PriceInDollar  string `json:"priceInDollar"`
-	VolumeInMW     string `json:"volumeInMW"`
+	BeginDateTimeUTC    string `json:"begin_datetime_utc"`
+	BeginDateTimeMPT    string `json:"begin_datetime_mpt"`
+	EndDateTimeUTC      string `json:"end_datetime_utc"`
+	EndDateTimeMPT      string `json:"end_datetime_mpt"`
+	SystemMarginalPrice string `json:"system_marginal_price"`
+	Volume              string `json:"volume"`
 }
 
 type AesoSystemMarginalPriceResponseReportPart struct {
@@ -57,41 +59,50 @@ func (a *AesoApiService) GetSystemMarginalPrice(start, end time.Time) ([]MappedS
 	return res, nil
 }
 
+func (a *AesoApiService) GetCurrentSystemMarginalPrice() ([]MappedSystemMarginalPrice, error) {
+	var response AesoSystemMarginalPriceResponse
+	var res []MappedSystemMarginalPrice
+	bytes, err := a.execute(AESO_API_URL_CURRENT_SYSTEMMARGINALPRICE)
+	if err != nil {
+		return []MappedSystemMarginalPrice{}, err
+	}
+	err = json.Unmarshal(bytes, &response)
+	if err != nil {
+		return []MappedSystemMarginalPrice{}, err
+	}
+	for _, entry := range response.Return.Report {
+		mappedValue, err := mapAesoSystemMarginalPriceToStruct(entry)
+		if err != nil {
+			return []MappedSystemMarginalPrice{}, err
+		}
+		res = append(res, mappedValue)
+	}
+	return res, nil
+}
+
 func mapAesoSystemMarginalPriceToStruct(entry AesoSystemMarginalPriceReport) (MappedSystemMarginalPrice, error) {
-	// Date comes back as yyyy-mm-dd HH
-	// But we also get a time in the format HH:MM
-	parts := strings.Split(entry.DateHourEnding, " ")
-	datePartString := parts[0]
-	timePartsString := parts[1]
-	hourString := entry.Time[0:2]
-	hour, err := strconv.ParseInt(hourString, 10, 64)
+	var m MappedSystemMarginalPrice
+	timeInUTC, err := time.Parse("2006-01-02 15:04", entry.BeginDateTimeUTC)
 	if err != nil {
-		return MappedSystemMarginalPrice{}, err
+		return m, err
 	}
-	entry.Time = fmt.Sprintf("%02d%s", (hour - 1), entry.Time[2:])
-	fullDateString := fmt.Sprintf("%s %s:00", datePartString, entry.Time)
-	date, err := ConvertAesoDateToUTC(fullDateString, "01/02/2006 15:04:05")
+	timeInUTC2, err := time.Parse("2006-01-02 15:04", entry.EndDateTimeUTC)
 	if err != nil {
-		return MappedSystemMarginalPrice{}, err
+		return m, err
 	}
-
-	h, err := strconv.ParseInt(timePartsString, 10, 64)
+	systemMarginalPrice, err := strconv.ParseFloat(entry.SystemMarginalPrice, 64)
 	if err != nil {
-		return MappedSystemMarginalPrice{}, err
+		return m, err
 	}
-
-	price, err := strconv.ParseFloat(entry.PriceInDollar, 64)
+	volume, err := strconv.ParseFloat(entry.Volume, 64)
 	if err != nil {
-		return MappedSystemMarginalPrice{}, err
+		return m, err
 	}
-	volume, err := strconv.ParseFloat(entry.VolumeInMW, 64)
-	if err != nil {
-		return MappedSystemMarginalPrice{}, err
+	m = MappedSystemMarginalPrice{
+		BeginDateTimeUTC:    timeInUTC,
+		EndDateTimeUTC:      timeInUTC2,
+		SystemMarginalPrice: systemMarginalPrice,
+		Volume:              volume,
 	}
-	return MappedSystemMarginalPrice{
-		Date:       date,
-		HourEnding: h,
-		Price:      price,
-		VolumeInMW: volume,
-	}, nil
+	return m, nil
 }
