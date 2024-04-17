@@ -11,9 +11,6 @@ import (
 
 	"github.com/jimdhughes/go-aeso-client/mocks"
 )
-
-var aesoClient AesoApiService
-
 func TestMapReportValueToStructExpectSucess(t *testing.T) {
 	input := AesoAlbertaInternalLoadResponseReport{
 		BeginDateTimeUTC:            "2022-01-19 07:00",
