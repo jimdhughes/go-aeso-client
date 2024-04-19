@@ -38,7 +38,7 @@ func (a *AesoApiService) execute(url string) ([]byte, error) {
 		return []byte{}, err
 	}
 	if res.StatusCode >= 400 {
-		return []byte{}, fmt.Errorf("%s: %d", ERR_INVALID_RESPONSE_CODE, res.StatusCode)
+		return []byte{}, fmt.Errorf("%s", ERR_INVALID_RESPONSE_CODE)
 	}
 	defer res.Body.Close()
 	buffer, err := io.ReadAll(res.Body)

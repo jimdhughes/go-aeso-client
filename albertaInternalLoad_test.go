@@ -3,7 +3,7 @@ package aeso
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"testing"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/jimdhughes/go-aeso-client/mocks"
 )
+
 func TestMapReportValueToStructExpectSucess(t *testing.T) {
 	input := AesoAlbertaInternalLoadResponseReport{
 		BeginDateTimeUTC:            "2022-01-19 07:00",
@@ -65,10 +66,10 @@ func TestHandleAesoResponseExpectFailure(t *testing.T) {
 	}
 	sDate := time.Now()
 	eDate := time.Now()
-	sDate.Add(-1 * 24 * time.Hour)
+	sDate = sDate.Add(-1 * 24 * time.Hour)
 	_, err := aesoClient.GetAlbertaInternalLoad(sDate, eDate)
 	log.Printf("Got Error: %v", err)
-	if err == nil && err.Error() != errMsg {
+	if err.Error() != errMsg && err == nil {
 		t.Errorf("Expected Error: %s. Expected Error: %v", errMsg, err)
 	}
 }
@@ -81,16 +82,30 @@ func TestHandleAesoResponseExpect400ResponseAndErr(t *testing.T) {
 	}
 	sDate := time.Now()
 	eDate := time.Now()
-	sDate.Add(-1 * 24 * time.Hour)
+	sDate = sDate.Add(-1 * 24 * time.Hour)
 	_, err := aesoClient.GetAlbertaInternalLoad(sDate, eDate)
-	if err == nil && err.Error() != ERR_INVALID_RESPONSE_CODE {
-		t.Errorf("Expected Error: %s. Expected Error: %v", ERR_INVALID_RESPONSE_CODE, err)
+	if err.Error() != ERR_INVALID_RESPONSE_CODE && err != nil {
+		t.Errorf("Expected Error: %s. Got Error: %v", ERR_INVALID_RESPONSE_CODE, err)
 	}
 }
 
-func TestHandleAesoResponseExpectValidResponse(t *testing.T) {
-	json := `{"timestamp":"2022-01-19 07:00","responseCode":"200","return":{"Actual Forecast Report":[{"begin_date_time_utc":"2022-01-19 07:00","begin_date_time_mpt":"2022-01-19 00:00","alberta_internal_load":"0.0","forecast_alberta_internal_load":"0.0"}]}}`
-	r := ioutil.NopCloser(bytes.NewReader([]byte(json)))
+func TestMappingMockedResponse(t *testing.T) {
+	const json = `
+	{
+		"timestamp": "2024-04-19 03:06:54.730+0000",
+		"responseCode": "200",
+		"return": {
+			"Actual Forecast Report": [
+				{
+					"begin_datetime_utc": "2024-04-14 06:00",
+					"begin_datetime_mpt": "2024-04-14 00:00",
+					"alberta_internal_load": "9131",
+					"forecast_alberta_internal_load": "9123"
+				}
+			]
+		}
+	}`
+	r := io.NopCloser(bytes.NewReader([]byte(json)))
 	mocks.GetDoFunc = func(*http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
@@ -99,14 +114,27 @@ func TestHandleAesoResponseExpectValidResponse(t *testing.T) {
 	}
 	sDate := time.Now()
 	eDate := time.Now()
-	sDate.Add(-1 * 24 * time.Hour)
-	response, err := aesoClient.GetAlbertaInternalLoad(sDate, eDate)
+	sDate = sDate.Add(-1 * 24 * time.Hour)
+	result, err := aesoClient.GetAlbertaInternalLoad(sDate, eDate)
 	if err != nil {
 		t.Errorf("Error: %v", err)
+		return
 	}
-	if len(response) != 1 {
-		t.Errorf("Expected 1 item in response, got %d", len(response))
+	if len(result) != 1 {
+		t.Errorf("Expected: 1, Actual: %v", len(result))
+		return
 	}
+	var expectedResult = result[0]
+	if expectedResult.BeginDateTimeUTC.Year() != 2024 {
+		t.Errorf("Expected: 2022, Actual: %v", result[0].BeginDateTimeUTC.Year())
+	}
+	if expectedResult.AlbertaInternalLoad != 9131 {
+		t.Errorf("Expected: 9131, Actual: %v", result[0].AlbertaInternalLoad)
+	}
+	if expectedResult.ForecastAlbertaInternalLoad != 9123 {
+		t.Errorf("Expected: 9123, Actual: %v", result[0].ForecastAlbertaInternalLoad)
+	}
+
 }
 
 func init() {

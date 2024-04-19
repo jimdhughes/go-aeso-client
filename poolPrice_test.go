@@ -1,8 +1,13 @@
 package aeso
 
 import (
+	"bytes"
+	"io"
+	"net/http"
 	"testing"
 	"time"
+
+	"github.com/jimdhughes/go-aeso-client/mocks"
 )
 
 func TestMapReportValueToStruct(t *testing.T) {
@@ -131,4 +136,59 @@ func TestPoolPriceMappingForHourEnding24(t *testing.T) {
 	if mappedValue.BeginDateTimeUTC.Hour() != 23 {
 		t.Errorf("Expected %d got %d", 23, mappedValue.BeginDateTimeUTC.Hour())
 	}
+}
+
+func TestParsingValidJsonResponse(t *testing.T) {
+	const json = `
+	{
+		"timestamp": "2024-04-19 03:29:58.480+0000",
+		"responseCode": "200",
+		"return": {
+			"Pool Price Report": [
+				{
+					"begin_datetime_utc": "2024-04-14 06:00",
+					"begin_datetime_mpt": "2024-04-14 00:00",
+					"pool_price": "28.89",
+					"forecast_pool_price": "28.77",
+					"rolling_30day_avg": "66.02"
+				},
+				{
+					"begin_datetime_utc": "2024-04-14 07:00",
+					"begin_datetime_mpt": "2024-04-14 01:00",
+					"pool_price": "32.81",
+					"forecast_pool_price": "31.35",
+					"rolling_30day_avg": "66.07"
+				}
+			]
+		}
+	}`
+	r := io.NopCloser(bytes.NewReader([]byte(json)))
+	mocks.GetDoFunc = func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: 200,
+			Body:       r,
+		}, nil
+	}
+	sDate, eDate := time.Now(), time.Now()
+	sDate = sDate.Add(-1 * 24 * time.Hour)
+	result, err := aesoClient.GetPoolPrice(sDate, eDate)
+	if err != nil {
+		t.Errorf("Error: %v", err)
+	}
+	if len(result) != 2 {
+		t.Errorf("Expected: 1, Actual: %v", len(result))
+	}
+	if result[0].BeginDateTimeUTC.Year() != 2024 {
+		t.Errorf("Expected: 2024, Actual: %v", result[0].BeginDateTimeUTC.Year())
+	}
+	if result[0].PoolPrice != 28.89 {
+		t.Errorf("Expected: 28.89, Actual: %v", result[0].PoolPrice)
+	}
+	if result[0].ForecastPoolPrice != 28.77 {
+		t.Errorf("Expected: 28.77, Actual: %v", result[0].ForecastPoolPrice)
+	}
+	if result[0].RollingThirtyDayAverage != 66.02 {
+		t.Errorf("Expected: 66.02, Actual: %v", result[0].RollingThirtyDayAverage)
+	}
+
 }

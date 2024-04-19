@@ -10,14 +10,14 @@ import (
 const AESO_API_URL_ALBERTAINTERNALLOAD = "https://api.aeso.ca/report/v1/load/albertaInternalLoad?startDate=%s&endDate=%s"
 
 type MappedAlbertaInternalLoad struct {
-	BeginDateTimeUTC            time.Time `json:"beginDateTimeUTC"`
-	AlbertaInternalLoad         float64   `json:"actualInternalLoad"`
-	ForecastAlbertaInternalLoad float64   `json:"forecastInternalLoad"`
+	BeginDateTimeUTC            time.Time `json:"begin_date_time_utc"`
+	AlbertaInternalLoad         float64   `json:"alberta_internal_load"`
+	ForecastAlbertaInternalLoad float64   `json:"forecast_alberta_internal_load"`
 }
 
 type AesoAlbertaInternalLoadResponseReport struct {
-	BeginDateTimeUTC            string `json:"begin_date_time_utc"`
-	BeginDateTimeMPT            string `json:"begin_date_time_mpt"`
+	BeginDateTimeUTC            string `json:"begin_datetime_utc"`
+	BeginDateTimeMPT            string `json:"begin_datetime_mpt"`
 	AlbertaInternalLoad         string `json:"alberta_internal_load"`
 	ForecastAlbertaInternalLoad string `json:"forecast_alberta_internal_load"`
 }

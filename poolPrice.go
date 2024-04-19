@@ -15,7 +15,7 @@ type AesoReportEntry struct {
 	BeginDateTimeMPT        string `json:"begin_datetime_mpt"`
 	PoolPrice               string `json:"pool_price"`
 	ForecastPoolPrice       string `json:"forecast_pool_price"`
-	RollingThirtyDayAverage string `json:"rolling_thirty_day_average"`
+	RollingThirtyDayAverage string `json:"rolling_30day_avg"`
 }
 
 type AesoPoolResponse struct {
@@ -32,7 +32,7 @@ type MappedPoolPrice struct {
 	BeginDateTimeUTC        time.Time `json:"begin_datetime_utc"`
 	PoolPrice               float64   `json:"pool_price"`
 	ForecastPoolPrice       float64   `json:"forecast_pool_price"`
-	RollingThirtyDayAverage float64   `json:"rolling_thirty_day_average"`
+	RollingThirtyDayAverage float64   `json:"rolling_30day_avg"`
 }
 
 func (a *AesoApiService) GetPoolPrice(start, end time.Time) ([]MappedPoolPrice, error) {
