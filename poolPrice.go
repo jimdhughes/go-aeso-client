@@ -68,13 +68,13 @@ func mapReportValueToStruct(entry AesoReportEntry) (MappedPoolPrice, error) {
 		return m, err
 	}
 	//sanitize - as 0's for entries that are not available
-	if entry.PoolPrice == "-" {
+	if entry.PoolPrice == "-" || entry.PoolPrice == "" {
 		entry.PoolPrice = "0"
 	}
-	if entry.RollingThirtyDayAverage == "-" {
+	if entry.RollingThirtyDayAverage == "-" || entry.RollingThirtyDayAverage == "" {
 		entry.RollingThirtyDayAverage = "0"
 	}
-	if entry.ForecastPoolPrice == "-" {
+	if entry.ForecastPoolPrice == "-" || entry.ForecastPoolPrice == "" {
 		entry.ForecastPoolPrice = "0"
 	}
 	price, err := strconv.ParseFloat(entry.PoolPrice, 64)
