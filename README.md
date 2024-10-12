@@ -35,3 +35,22 @@ func main() {
 	log.Println(poolPrice)
 }
 ```
+
+## API Coverage
+### Swagger API
+| Category | API | Completed? |
+|:--|:--|:--|
+| Pool Price Report | /v1.1/price/poolPrice | Yes |
+| System Marginal Price Report | /v1.1/price/systemMarginalPrice | Yes |
+| System Marginal Price Report | /v1.1/price/systemMarginalPrice/current | Yes |
+| Pool Participant API | /v1/poolparticipantlist | Yes |
+| Operating Reserve Offer Control Report | /v1/operatingReserveOfferControl | Yes |
+| Metered Volume Report | /v1/meteredvolume/details | No |
+|Energy Merit Order Report | /v1/meritOrder/energy | No |
+| Actual Forecast Report | /v1/load/albertaInternalLoad | Yes |
+| Current Supply Demand | /v1/csd/summary/current | Yes |
+| Current Supply Demand | /v1/csd/generation/assets/current | Yes |
+| Asset List API | /v1/assetlist | Yes |
+
+### APIM APIs
+*Not Started*
