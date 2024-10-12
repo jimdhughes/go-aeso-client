@@ -24,8 +24,14 @@ type AssetReport struct {
 	Return       []AssetReportPart `json:"return"`
 }
 
+// GetAssetReport returns a list of asset reports based on the parameters provided
+// operatingStatus: the operating status of the asset Valid: ALL, ACTIVE, RETIRED, SUSPENDED, INACTIVE
+// assetType: the type of asset. Valid: SOURCE, SINK
+// assetIds: a list of asset ids to filter the results by. Max 20
+// poolParticipantIds: a list of pool participant ids to filter the results by. Max 20
 func (a *AesoApiService) GetAssetReport(operatingStatus, assetType string, assetIDs []string, poolParticipantIds []string) ([]AssetReportPart, error) {
 	currUrl := buildAssetUrlRequest(operatingStatus, assetType, assetIDs, poolParticipantIds)
+
 	result, err := a.execute(currUrl)
 	if err != nil {
 		return []AssetReportPart{}, err
