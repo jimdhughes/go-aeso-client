@@ -25,10 +25,14 @@ type OperatingReserveTradeMeritOrder struct {
 	OperatingReserveBlocks []OperatingReserveBlocks `json:"operating_reserve_blocks"`
 }
 
+type OperatingReserveControlReportPart struct {
+	Report []OperatingReserveTradeMeritOrder `json:"Operating Reserve Trade Merit Order"`
+}
+
 type OperatingReserveOfferControlReport struct {
 	Timestamp    string                            `json:"timestamp"`
 	ResponseCode string                            `json:"responseCode"`
-	Return       []OperatingReserveTradeMeritOrder `json:"return"`
+	Return       OperatingReserveControlReportPart `json:"return"`
 }
 
 // GetOperatingReserveOfferControl returns a list of operating reserve trade merit orders based on the parameters provided
@@ -45,7 +49,7 @@ func (a *AesoApiService) GetOperatingReserveOfferControl(start time.Time) ([]Ope
 	if err != nil {
 		return []OperatingReserveTradeMeritOrder{}, err
 	}
-	return response.Return, nil
+	return response.Return.Report, nil
 }
 
 func buildOperatingReserveOfferControlUrlRequest(startDate string) string {
