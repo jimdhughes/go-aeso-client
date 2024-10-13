@@ -50,9 +50,9 @@ func buildCurrentSupplyDemandAssetUrl(assetIds []string) string {
 	if len(assetIds) > 0 {
 		for _, assetId := range assetIds {
 			if strings.Contains(url, "?") {
-				url = url + "&asset_ID=" + assetId
+				url = url + "&assetIds=" + assetId
 			} else {
-				url = url + "?asset_ID=" + assetId
+				url = url + "?assetIds=" + assetId
 
 			}
 		}
