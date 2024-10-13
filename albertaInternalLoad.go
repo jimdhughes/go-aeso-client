@@ -64,12 +64,17 @@ func mapResponseToInternalLoadStruct(response AesoAlbertaInternalLoadResponseRep
 	if err != nil {
 		return m, err
 	}
-
+	if response.AlbertaInternalLoad == "" {
+		response.AlbertaInternalLoad = "0"
+	}
 	abInternalLoad, err := strconv.ParseFloat(response.AlbertaInternalLoad, 64)
 	if err != nil {
 		return m, err
 	}
 
+	if response.ForecastAlbertaInternalLoad == "" {
+		response.ForecastAlbertaInternalLoad = "0"
+	}
 	abForecastInternalLoad, err := strconv.ParseFloat(response.ForecastAlbertaInternalLoad, 64)
 	if err != nil {
 		return m, err
