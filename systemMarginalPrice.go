@@ -11,8 +11,12 @@ const AESO_API_URL_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/price/
 const AESO_API_URL_CURRENT_SYSTEMMARGINALPRICE = "https://api.aeso.ca/report/v1.1/price/systemMarginalPrice/current"
 
 type MappedSystemMarginalPrice struct {
+	MappedSystemMarginalPriceCurrent
+	EndDateTimeUTC time.Time `json:"end_datetime_utc"`
+}
+
+type MappedSystemMarginalPriceCurrent struct {
 	BeginDateTimeUTC    time.Time `json:"begin_datetime_utc"`
-	EndDateTimeUTC      time.Time `json:"end_datetime_utc"`
 	SystemMarginalPrice float64   `json:"system_marginal_price"`
 	Volume              float64   `json:"volume"`
 }
@@ -59,25 +63,47 @@ func (a *AesoApiService) GetSystemMarginalPrice(start, end time.Time) ([]MappedS
 	return res, nil
 }
 
-func (a *AesoApiService) GetCurrentSystemMarginalPrice() ([]MappedSystemMarginalPrice, error) {
+func (a *AesoApiService) GetCurrentSystemMarginalPrice() ([]MappedSystemMarginalPriceCurrent, error) {
 	var response AesoSystemMarginalPriceResponse
-	var res []MappedSystemMarginalPrice
+	var res []MappedSystemMarginalPriceCurrent
 	bytes, err := a.execute(AESO_API_URL_CURRENT_SYSTEMMARGINALPRICE)
 	if err != nil {
-		return []MappedSystemMarginalPrice{}, err
+		return []MappedSystemMarginalPriceCurrent{}, err
 	}
 	err = json.Unmarshal(bytes, &response)
 	if err != nil {
-		return []MappedSystemMarginalPrice{}, err
+		return []MappedSystemMarginalPriceCurrent{}, err
 	}
 	for _, entry := range response.Return.Report {
-		mappedValue, err := mapAesoSystemMarginalPriceToStruct(entry)
+		mappedValue, err := mapAesoSystemMarginalPriceCurrentToStruct(entry)
 		if err != nil {
-			return []MappedSystemMarginalPrice{}, err
+			return []MappedSystemMarginalPriceCurrent{}, err
 		}
 		res = append(res, mappedValue)
 	}
 	return res, nil
+}
+
+func mapAesoSystemMarginalPriceCurrentToStruct(entry AesoSystemMarginalPriceReport) (MappedSystemMarginalPriceCurrent, error) {
+	var m MappedSystemMarginalPriceCurrent
+	timeInUTC, err := time.Parse("2006-01-02 15:04", entry.BeginDateTimeUTC)
+	if err != nil {
+		return m, err
+	}
+	systemMarginalPrice, err := strconv.ParseFloat(entry.SystemMarginalPrice, 64)
+	if err != nil {
+		return m, err
+	}
+	volume, err := strconv.ParseFloat(entry.Volume, 64)
+	if err != nil {
+		return m, err
+	}
+	m = MappedSystemMarginalPriceCurrent{
+		BeginDateTimeUTC:    timeInUTC,
+		SystemMarginalPrice: systemMarginalPrice,
+		Volume:              volume,
+	}
+	return m, nil
 }
 
 func mapAesoSystemMarginalPriceToStruct(entry AesoSystemMarginalPriceReport) (MappedSystemMarginalPrice, error) {
@@ -99,10 +125,12 @@ func mapAesoSystemMarginalPriceToStruct(entry AesoSystemMarginalPriceReport) (Ma
 		return m, err
 	}
 	m = MappedSystemMarginalPrice{
-		BeginDateTimeUTC:    timeInUTC,
-		EndDateTimeUTC:      timeInUTC2,
-		SystemMarginalPrice: systemMarginalPrice,
-		Volume:              volume,
+		MappedSystemMarginalPriceCurrent: MappedSystemMarginalPriceCurrent{
+			BeginDateTimeUTC:    timeInUTC,
+			SystemMarginalPrice: systemMarginalPrice,
+			Volume:              volume,
+		},
+		EndDateTimeUTC: timeInUTC2,
 	}
 	return m, nil
 }

@@ -20,10 +20,12 @@ func TestMapSystemMarginalPriceReportToStruct(t *testing.T) {
 		Volume:              "2.0",
 	}
 	expected := MappedSystemMarginalPrice{
-		BeginDateTimeUTC:    time.Date(2024, 4, 16, 05, 33, 0, 0, time.UTC),
-		EndDateTimeUTC:      time.Date(2024, 4, 16, 06, 00, 0, 0, time.UTC),
-		SystemMarginalPrice: 1.0,
-		Volume:              2.0,
+		MappedSystemMarginalPriceCurrent: MappedSystemMarginalPriceCurrent{
+			BeginDateTimeUTC:    time.Date(2024, 4, 16, 05, 33, 0, 0, time.UTC),
+			SystemMarginalPrice: 1.0,
+			Volume:              2.0,
+		},
+		EndDateTimeUTC: time.Date(2024, 4, 16, 06, 00, 0, 0, time.UTC),
 	}
 	result, err := mapAesoSystemMarginalPriceToStruct(report)
 	if err != nil {
