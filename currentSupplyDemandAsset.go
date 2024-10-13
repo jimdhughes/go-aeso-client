@@ -54,6 +54,7 @@ func buildCurrentSupplyDemandAssetUrl(assetIds []string) string {
 			} else {
 				url = url + "?assetIds=" + assetId
 
+
 			}
 		}
 	}
