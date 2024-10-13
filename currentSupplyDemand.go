@@ -5,7 +5,7 @@ import "encoding/json"
 const AESO_API_URL_CURRENT_SUPPLY_DEMAND_SUMMARY = "https://api.aeso.ca/report/v1/csd/summary/current"
 
 type InterchangeEntry struct {
-	Path       string `json:"string"`
+	Path       string `json:"path"`
 	ActualFlow int32  `json:"actual_flow"`
 }
 
