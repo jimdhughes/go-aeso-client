@@ -1,6 +1,9 @@
 package aeso
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"strings"
+)
 
 const AESO_API_URL_CURRENT_SUPPLY_DEMAND_ASSET = "https://api.aeso.ca/report/v1/csd/generation/assets/current"
 
@@ -25,9 +28,13 @@ type CurrentSupplyDemandAssetResponse struct {
 	Return       CurrentSupplyDemandAssetEntry `json:"return"`
 }
 
-func (a *AesoApiService) GetCurrentSupplyDemandAsset() (CurrentSupplyDemandAssetEntry, error) {
+// GetCurrentSupplyDemandAsset returns the current supply and demand for the specified asset IDs.
+// If no asset IDs are specified, the function will return the current supply and demand for all assets.
+// assetIds is a list of asset IDs to retrieve the current supply and demand for.(Max 20)
+func (a *AesoApiService) GetCurrentSupplyDemandAsset(assetIds []string) (CurrentSupplyDemandAssetEntry, error) {
 	var aesoRes CurrentSupplyDemandAssetResponse
-	bytes, err := a.execute(AESO_API_URL_CURRENT_SUPPLY_DEMAND_ASSET)
+	url := buildCurrentSupplyDemandAssetUrl(assetIds)
+	bytes, err := a.execute(url)
 	if err != nil {
 		return CurrentSupplyDemandAssetEntry{}, err
 	}
@@ -36,4 +43,19 @@ func (a *AesoApiService) GetCurrentSupplyDemandAsset() (CurrentSupplyDemandAsset
 		return CurrentSupplyDemandAssetEntry{}, err
 	}
 	return aesoRes.Return, nil
+}
+
+func buildCurrentSupplyDemandAssetUrl(assetIds []string) string {
+	var url = AESO_API_URL_CURRENT_SUPPLY_DEMAND_ASSET
+	if len(assetIds) > 0 {
+		for _, assetId := range assetIds {
+			if strings.Contains(url, "?") {
+				url = url + "&asset_ID=" + assetId
+			} else {
+				url = url + "?asset_ID=" + assetId
+
+			}
+		}
+	}
+	return url
 }
