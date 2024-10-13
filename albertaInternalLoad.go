@@ -32,6 +32,9 @@ type AesoAlbertaInternalLoadResponse struct {
 	Return       AesoAlbertaInternalLoadResponseReportPart `json:"return"`
 }
 
+// GetAlbertaInternalLoad returns the Alberta internal load for the specified date range.
+// start is the start date of the range to retrieve data for from 2000-01-01
+// end is the end date of the range to retrieve data for from 2000-01-01
 func (a *AesoApiService) GetAlbertaInternalLoad(start, end time.Time) ([]MappedAlbertaInternalLoad, error) {
 	var res []MappedAlbertaInternalLoad
 	var aesoRes AesoAlbertaInternalLoadResponse
