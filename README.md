@@ -45,7 +45,7 @@ func main() {
 | System Marginal Price Report | /v1.1/price/systemMarginalPrice/current | Yes |
 | Pool Participant API | /v1/poolparticipantlist | Yes |
 | Operating Reserve Offer Control Report | /v1/operatingReserveOfferControl | Yes |
-| Metered Volume Report | /v1/meteredvolume/details | No |
+| Metered Volume Report | /v1/meteredvolume/details | Yes |
 |Energy Merit Order Report | /v1/meritOrder/energy | No |
 | Actual Forecast Report | /v1/load/albertaInternalLoad | Yes |
 | Current Supply Demand | /v1/csd/summary/current | Yes |

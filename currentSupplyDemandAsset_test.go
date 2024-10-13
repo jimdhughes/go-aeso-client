@@ -36,7 +36,7 @@ func TestMockCurrentSupplyDemandAsset(t *testing.T) {
 			Body:       r,
 		}, nil
 	}
-	result, err := aesoClient.GetCurrentSupplyDemandAsset()
+	result, err := aesoClient.GetCurrentSupplyDemandAsset([]string{"1"})
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
