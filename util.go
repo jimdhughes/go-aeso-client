@@ -11,14 +11,22 @@ func GetTimezoneOffsetFromMSTForDate(date time.Time) (int, error) {
 	return offset, nil
 }
 
-func ConvertAesoDateToUTC(date string, format string) (time.Time, error) {
-	// set the golang timezone to Edmonton
+func ConvertAesoDateStringToDate(date string, format string) (time.Time, error) {
 	loc, err := time.LoadLocation("America/Edmonton")
 	if err != nil {
 		return time.Time{}, err
 	}
 	// parse the date string
 	t, err := time.ParseInLocation(format, date, loc)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t, nil
+}
+
+func ConvertAesoDateToUTC(date string, format string) (time.Time, error) {
+	// set the golang timezone to Edmonton
+	t, err := ConvertAesoDateStringToDate(date, format)
 	if err != nil {
 		return time.Time{}, err
 	}

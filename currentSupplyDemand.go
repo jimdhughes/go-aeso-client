@@ -1,6 +1,9 @@
 package aeso
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+)
 
 const AESO_API_URL_CURRENT_SUPPLY_DEMAND_SUMMARY = "https://api.aeso.ca/report/v1/csd/summary/current"
 
@@ -34,21 +37,37 @@ type CurrentSupplyDemandEntry struct {
 	InterchangeList                   []InterchangeEntry    `json:"interchange_list"`
 }
 
+type MappedCurrentSupplyDemand struct {
+	CurrentSupplyDemandEntry
+	LastUpdatedDateTimeUTC time.Time `json:"last_updated_datetime_utc"`
+	LastUpdatedDateTimeMPT time.Time `json:"last_updated_datetime_mpt"`
+}
+
 type CurrentSupplyDemandResponse struct {
 	Timestamp    string                   `json:"timestamp"`
 	ResponseCode string                   `json:"responseCode"`
 	Return       CurrentSupplyDemandEntry `json:"return"`
 }
 
-func (a *AesoApiService) GetCurrentSupplyDemandSummary() (CurrentSupplyDemandEntry, error) {
+func (a *AesoApiService) GetCurrentSupplyDemandSummary() (MappedCurrentSupplyDemand, error) {
 	var aesoRes CurrentSupplyDemandResponse
 	bytes, err := a.execute(AESO_API_URL_CURRENT_SUPPLY_DEMAND_SUMMARY)
 	if err != nil {
-		return CurrentSupplyDemandEntry{}, err
+		return MappedCurrentSupplyDemand{}, err
 	}
 	err = json.Unmarshal(bytes, &aesoRes)
 	if err != nil {
-		return CurrentSupplyDemandEntry{}, err
+		return MappedCurrentSupplyDemand{}, err
 	}
-	return aesoRes.Return, nil
+	return mapCurrentSupplyDemand(aesoRes.Return), nil
+}
+
+func mapCurrentSupplyDemand(aesoRes CurrentSupplyDemandEntry) MappedCurrentSupplyDemand {
+	lastUpdatedDateTimeUTC, _ := ConvertAesoDateToUTC(aesoRes.LastUpdatedDateTimeMPT, "2006-01-02 15:04")
+	lastUpdatedDateTimeMPT, _ := ConvertAesoDateStringToDate(aesoRes.LastUpdatedDateTimeMPT, "2006-01-02 15:04")
+	return MappedCurrentSupplyDemand{
+		CurrentSupplyDemandEntry: aesoRes,
+		LastUpdatedDateTimeUTC:   lastUpdatedDateTimeUTC,
+		LastUpdatedDateTimeMPT:   lastUpdatedDateTimeMPT,
+	}
 }
