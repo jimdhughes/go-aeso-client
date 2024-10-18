@@ -35,11 +35,21 @@ type MappedPoolPrice struct {
 	RollingThirtyDayAverage float64   `json:"rolling_30day_avg"`
 }
 
-func (a *AesoApiService) GetPoolPrice(start, end time.Time) ([]MappedPoolPrice, error) {
+func (a *AesoApiService) GetPoolPrice(start, end time.Time, includeHour bool) ([]MappedPoolPrice, error) {
 	var res []MappedPoolPrice
 	var aesoRes AesoPoolResponse
-	sDateString := start.Format("2006-01-02")
-	eDateString := end.Format("2006-01-02")
+	var sDateString, eDateString string = "", ""
+	if !includeHour {
+		sDateString = start.Format("2006-01-02")
+		if !end.IsZero() {
+			eDateString = end.Format("2006-01-02")
+		}
+	} else {
+		sDateString = start.Format("2006-01-02 15")
+		if !end.IsZero() {
+			eDateString = end.Format("2006-01-02 15")
+		}
+	}
 	bytes, err := a.execute(fmt.Sprintf(AESO_API_URL_POOLPRICE, sDateString, eDateString))
 	if err != nil {
 		return res, err

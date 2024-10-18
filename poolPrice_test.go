@@ -171,7 +171,7 @@ func TestParsingValidJsonResponse(t *testing.T) {
 	}
 	sDate, eDate := time.Now(), time.Now()
 	sDate = sDate.Add(-1 * 24 * time.Hour)
-	result, err := aesoClient.GetPoolPrice(sDate, eDate)
+	result, err := aesoClient.GetPoolPrice(sDate, eDate, false)
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
